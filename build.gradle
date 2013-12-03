@@ -1,0 +1,120 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'pmd'
+apply plugin: 'findbugs'
+apply plugin: 'checkstyle'
+
+description = 'Guanaco'
+
+group = 'info.exascale'
+version = '0.1.0-alpha'
+ext.releaseBranch = 'master'
+
+if (!hasProperty('buildNumber') || !(hasProperty('branchName') && branchName == releaseBranch)) {
+  // We're probably building on a dev machine or we're building a branch
+  ext.buildNumber = 'dev'
+}
+if (!hasProperty('revisionNumber')) {
+  // We're probably building on a dev machine
+  ext.revisionNumber = 'dev'
+}
+
+if (!version.contains('-') && !(hasProperty('releaseVersion') && releaseVersion == version)) {
+  // Append '-rc' if we're not releasing yet
+  version += '-rc'
+}
+
+if (version.contains('-')) {
+  // Append the buildNumber if we're not releasing
+  version += '.' + buildNumber
+}
+
+if (version.contains('-') && !(hasProperty('branchName') && branchName == releaseBranch)) {
+  // Append the revisionNumber if we're not releasing and not on a release branch
+  version += '+' + revisionNumber
+}
+
+println "Building version ${version}"
+
+repositories {
+  mavenCentral()
+}
+
+tasks.withType(Pmd) {
+  pmd {
+    ignoreFailures = true
+  }
+}
+
+tasks.withType(FindBugs) {
+  findbugs {
+    ignoreFailures = true
+  }
+}
+
+tasks.withType(Checkstyle) {
+  checkstyle {
+    ignoreFailures = true
+    showViolations = false
+  }
+}
+
+dependencies {
+  testCompile 'junit:junit:4.+'
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+processResources {
+  filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+    version: project.version,
+    buildNumber: project.buildNumber,
+    revisionNumber: project.revisionNumber
+  ])
+}
+
+jar {
+  manifest {
+    attributes 'Implementation-Title': project.name, 'Implementation-Version': project.version
+  }
+}
+
+task testsJar(type: Jar, dependsOn: testClasses) {
+  classifier = 'tests'
+  from sourceSets.test.output
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+task dist(type: Zip) {
+  def baseDir = "${project.name}-${project.version}"
+
+  into("$baseDir") {
+    from 'README.md'
+    from 'LICENSE'
+    from 'NOTICE'
+    from jar
+    from testsJar
+    from sourcesJar
+    from javadocJar
+  }
+}
+
+artifacts {
+  archives testsJar
+  archives sourcesJar
+  archives javadocJar
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.8'
+}
