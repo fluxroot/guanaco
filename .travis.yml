@@ -1,6 +1,14 @@
 language: java
+
 jdk:
 - oraclejdk7
-- openjdk7
+
+env:
+- TERM=dumb
+
 before_install:
 - chmod +x gradlew
+
+after_success:
+- gradle cobertura
+- gradle coveralls

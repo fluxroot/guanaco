@@ -3,6 +3,8 @@ apply plugin: 'maven'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
 apply plugin: 'checkstyle'
+apply plugin: 'cobertura'
+apply plugin: 'coveralls'
 
 description = 'Guanaco'
 
@@ -36,6 +38,17 @@ if (version.contains('-') && !(hasProperty('branchName') && branchName == releas
 
 println "Building version ${version}"
 
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'net.saliman:gradle-cobertura-plugin:2.0.0'
+    classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:0.1.6'
+  }
+}
+
 repositories {
   mavenCentral()
 }
@@ -58,6 +71,8 @@ tasks.withType(Checkstyle) {
     showViolations = false
   }
 }
+
+cobertura.coverageFormats = ['html', 'xml']
 
 dependencies {
   testCompile 'junit:junit:4.+'
