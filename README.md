@@ -1,7 +1,7 @@
 Guanaco
 =======
 
-Copyright 2013 Phokham Nonava <pn@nonava.com>  
+Copyright 2013-2014 Phokham Nonava <pn@nonava.com>  
 https://github.com/fluxroot/guanaco
 
 [![Build Status](https://travis-ci.org/fluxroot/guanaco.png?branch=master)](https://travis-ci.org/fluxroot/guanaco) [![Coverage Status](https://coveralls.io/repos/fluxroot/guanaco/badge.png?branch=master)](https://coveralls.io/r/fluxroot/guanaco?branch=master)

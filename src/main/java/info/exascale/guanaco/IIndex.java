@@ -15,19 +15,16 @@
  */
 package info.exascale.guanaco;
 
-import org.junit.Test;
+import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+public interface IIndex {
 
-public class VersionInfoTest {
+  ByteArray get(ByteArray key) throws IOException;
 
-  @Test
-  public void testVersionInfo() {
-    VersionInfo versionInfo = VersionInfo.current();
+  void put(ByteArray key, ByteArray value) throws IOException;
 
-    assertEquals("0.1.0-alpha", versionInfo.getVersion());
-    assertEquals("dev", versionInfo.getBuildNumber());
-    assertEquals("dev", versionInfo.getRevisionNumber());
-  }
+  void delete(ByteArray key) throws IOException;
+
+  void add(ByteArray key, OnDiskPage page);
 
 }

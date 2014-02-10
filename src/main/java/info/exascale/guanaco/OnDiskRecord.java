@@ -15,19 +15,34 @@
  */
 package info.exascale.guanaco;
 
-import org.junit.Test;
+import java.io.IOException;
+import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
+public abstract class OnDiskRecord {
 
-public class VersionInfoTest {
+  private final UUID pid;
+  private final ByteArray key;
 
-  @Test
-  public void testVersionInfo() {
-    VersionInfo versionInfo = VersionInfo.current();
+  private final long position;
 
-    assertEquals("0.1.0-alpha", versionInfo.getVersion());
-    assertEquals("dev", versionInfo.getBuildNumber());
-    assertEquals("dev", versionInfo.getRevisionNumber());
+  protected OnDiskRecord(long position, UUID pid, ByteArray key) {
+    this.position = position;
+    this.pid = pid;
+    this.key = key;
+  }
+
+  public abstract InMemoryRecord accept(StorageManager storageManager) throws IOException;
+
+  public UUID getPid() {
+    return pid;
+  }
+
+  public ByteArray getKey() {
+    return key;
+  }
+
+  public long getPosition() {
+    return position;
   }
 
 }

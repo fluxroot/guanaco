@@ -15,19 +15,18 @@
  */
 package info.exascale.guanaco;
 
-import org.junit.Test;
+import java.io.IOException;
+import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
+public class OnDiskPageRecord extends OnDiskRecord {
 
-public class VersionInfoTest {
+  public OnDiskPageRecord(long position, UUID pageId, ByteArray key) {
+    super(position, pageId, key);
+  }
 
-  @Test
-  public void testVersionInfo() {
-    VersionInfo versionInfo = VersionInfo.current();
-
-    assertEquals("0.1.0-alpha", versionInfo.getVersion());
-    assertEquals("dev", versionInfo.getBuildNumber());
-    assertEquals("dev", versionInfo.getRevisionNumber());
+  @Override
+  public InMemoryPageRecord accept(StorageManager storageManager) throws IOException {
+    return storageManager.read(this);
   }
 
 }
