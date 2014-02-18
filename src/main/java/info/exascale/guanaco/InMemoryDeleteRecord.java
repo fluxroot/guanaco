@@ -15,19 +15,23 @@
  */
 package info.exascale.guanaco;
 
-import org.junit.Test;
+import java.io.IOException;
+import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
+public class InMemoryDeleteRecord extends InMemoryRecord {
 
-public class VersionInfoTest {
+  public InMemoryDeleteRecord(UUID pageId, ByteArray key) {
+    super(pageId, key);
+  }
 
-  @Test
-  public void testVersionInfo() {
-    VersionInfo versionInfo = VersionInfo.current();
+  @Override
+  public ByteArray get(InMemoryPage page) {
+    return page.get(this);
+  }
 
-    assertEquals("0.1.0-alpha", versionInfo.getVersion());
-    assertEquals("dev", versionInfo.getBuildNumber());
-    assertEquals("dev", versionInfo.getRevisionNumber());
+  @Override
+  public void write(StorageManager storageManager) throws IOException {
+    storageManager.write(this);
   }
 
 }

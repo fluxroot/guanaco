@@ -12,16 +12,16 @@ group = 'info.exascale'
 version = '0.1.0-alpha'
 ext.releaseBranch = 'master'
 
-if (!hasProperty('buildNumber') || !(hasProperty('branchName') && branchName == releaseBranch)) {
+if (!project.hasProperty('buildNumber') || !(project.hasProperty('branchName') && branchName == releaseBranch)) {
   // We're probably building on a dev machine or we're building a branch
   ext.buildNumber = 'dev'
 }
-if (!hasProperty('revisionNumber')) {
+if (!project.hasProperty('revisionNumber')) {
   // We're probably building on a dev machine
   ext.revisionNumber = 'dev'
 }
 
-if (!version.contains('-') && !(hasProperty('releaseVersion') && releaseVersion == version)) {
+if (!version.contains('-') && !(project.hasProperty('releaseVersion') && releaseVersion == version)) {
   // Append '-rc' if we're not releasing yet
   version += '-rc'
 }
@@ -31,12 +31,12 @@ if (version.contains('-')) {
   version += '.' + buildNumber
 }
 
-if (version.contains('-') && !(hasProperty('branchName') && branchName == releaseBranch)) {
+if (version.contains('-') && !(project.hasProperty('branchName') && branchName == releaseBranch)) {
   // Append the revisionNumber if we're not releasing and not on a release branch
   version += '+' + revisionNumber
 }
 
-println "Building version ${version}"
+afterEvaluate { println "Building ${name} version ${version}" }
 
 buildscript {
   repositories {
@@ -67,6 +67,7 @@ tasks.withType(FindBugs) {
 
 tasks.withType(Checkstyle) {
   checkstyle {
+    configFile = new File("${rootDir}/config/checkstyle/checkstyle.xml")
     ignoreFailures = true
     showViolations = false
   }
@@ -76,13 +77,29 @@ cobertura.coverageFormats = ['html', 'xml']
 
 sourceSets {
   integration
+  testing
+}
+
+configurations {
+  integrationCompile.extendsFrom testCompile
+  integrationRuntime.extendsFrom testRuntime
+
+  testingCompile.extendsFrom testCompile
+  testingRuntime.extendsFrom testRuntime
 }
 
 dependencies {
+  compile 'com.google.guava:guava:16.+'
+  compile 'org.slf4j:slf4j-api:1.7.+'
+  compile 'org.slf4j:slf4j-log4j12:1.7.+'
+  compile 'log4j:log4j:1.2.+'
+  compile 'org.iq80.leveldb:leveldb:0.7'
+
   testCompile 'junit:junit:4.+'
 
-  integrationCompile project(':')
-  integrationCompile 'junit:junit:4.+'
+  integrationCompile project(path: ':', configuration: 'testRuntime')
+
+  testingCompile project(path: ':', configuration: 'testRuntime')
 }
 
 sourceCompatibility = 1.7
@@ -90,9 +107,9 @@ targetCompatibility = 1.7
 
 processResources {
   filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
-    version: project.version,
-    buildNumber: project.buildNumber,
-    revisionNumber: project.revisionNumber
+      version: project.version,
+      buildNumber: project.buildNumber,
+      revisionNumber: project.revisionNumber
   ])
 }
 
@@ -100,6 +117,11 @@ jar {
   manifest {
     attributes 'Implementation-Title': project.name, 'Implementation-Version': project.version
   }
+}
+
+task testsJar(type: Jar, dependsOn: testClasses) {
+  classifier = 'tests'
+  from sourceSets.test.output
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -121,7 +143,11 @@ task dist(type: Zip) {
   def baseDir = "${project.name}-${project.version}"
 
   into("$baseDir") {
-    from 'README.md'
+    from('README.md') {
+      filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+          version: project.version
+      ])
+    }
     from 'LICENSE'
     from 'NOTICE'
 
@@ -132,10 +158,24 @@ task dist(type: Zip) {
 }
 
 artifacts {
+  testCompile testsJar
+
+  archives testsJar
   archives sourcesJar
   archives javadocJar
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '1.8'
+  gradleVersion = '1.10'
+}
+
+apply plugin: 'idea'
+
+idea {
+  module {
+    testSourceDirs += sourceSets.integration.java.srcDirs
+    testSourceDirs += sourceSets.integration.resources.srcDirs
+    testSourceDirs += sourceSets.testing.java.srcDirs
+    testSourceDirs += sourceSets.testing.resources.srcDirs
+  }
 }

@@ -15,19 +15,31 @@
  */
 package info.exascale.guanaco;
 
-import org.junit.Test;
+import java.io.IOException;
+import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
+public abstract class Page {
 
-public class VersionInfoTest {
+  private final UUID pid;
 
-  @Test
-  public void testVersionInfo() {
-    VersionInfo versionInfo = VersionInfo.current();
-
-    assertEquals("0.1.0-alpha", versionInfo.getVersion());
-    assertEquals("dev", versionInfo.getBuildNumber());
-    assertEquals("dev", versionInfo.getRevisionNumber());
+  protected Page() {
+    pid = UUID.randomUUID();
   }
+
+  protected Page(UUID pid) {
+    if (pid == null) throw new IllegalArgumentException();
+
+    this.pid = pid;
+  }
+
+  public UUID getPid() {
+    return pid;
+  }
+
+  public abstract InMemoryPage getInMemoryPage(CacheManager cacheManager) throws IOException;
+
+  public abstract OnDiskPage getOnDiskPage(CacheManager cacheManager);
+
+  public abstract void flush(StorageManager storageManager) throws IOException;
 
 }

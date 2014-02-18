@@ -15,19 +15,32 @@
  */
 package info.exascale.guanaco;
 
-import org.junit.Test;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
+/**
+ * Our mapping table. As described for the Bw-Tree, this maps a logical "page identifier" or PID to a page.
+ */
+public class MappingTable {
 
-public class VersionInfoTest {
+  private final Map<UUID, Page> map = new HashMap<>();
 
-  @Test
-  public void testVersionInfo() {
-    VersionInfo versionInfo = VersionInfo.current();
+  public Page get(UUID pid) {
+    if (pid == null) throw new IllegalArgumentException();
 
-    assertEquals("0.1.0-alpha", versionInfo.getVersion());
-    assertEquals("dev", versionInfo.getBuildNumber());
-    assertEquals("dev", versionInfo.getRevisionNumber());
+    return map.get(pid);
+  }
+
+  public void put(Page page) {
+    if (page == null) throw new IllegalArgumentException();
+
+    map.put(page.getPid(), page);
+  }
+
+  public Iterator<Page> iterator() {
+    return map.values().iterator();
   }
 
 }
