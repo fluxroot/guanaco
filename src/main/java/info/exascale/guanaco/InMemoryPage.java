@@ -97,22 +97,6 @@ public class InMemoryPage extends Page {
     }
   }
 
-  public ByteArray get(InMemoryPageRecord record) {
-    return record.getValue();
-  }
-
-  public ByteArray get(InMemoryInsertRecord record) {
-    return record.getValue();
-  }
-
-  public ByteArray get(InMemoryModifyRecord record) {
-    return record.getValue();
-  }
-
-  public ByteArray get(InMemoryDeleteRecord record) {
-    return null;
-  }
-
   public Collection<InMemoryPageRecord> getPageRecords() {
     Collection<InMemoryPageRecord> collection = new ArrayList<>();
 
