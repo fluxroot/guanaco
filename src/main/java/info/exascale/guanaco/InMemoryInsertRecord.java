@@ -29,7 +29,7 @@ public class InMemoryInsertRecord extends InMemoryRecord {
 
   @Override
   public ByteArray get(InMemoryPage page) {
-    return page.get(this);
+    return getValue();
   }
 
   @Override
